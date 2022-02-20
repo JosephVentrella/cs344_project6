@@ -16,6 +16,26 @@ struct block {
 
 struct block *head = NULL;
 
+void split_space(struct block *current_node, int requested_size){
+    int padded_struct_block_size = PADDED_SIZE(sizeof(struct block));
+    int required_space = requested_size + padded_struct_block_size;
+    int available_space = current_node->size;
+    if (available_space > required_space){
+        struct block *new_node = NULL;
+        new_node = sbrk(1024);
+        new_node->next = NULL;
+        new_node->size = available_space-required_space;
+        new_node->in_use = 0;
+        current_node->size = requested_size;
+        current_node->next = new_node;
+    }
+}
+
+void myfree(void *p){
+    struct block *temp = p - PADDED_SIZE(sizeof(struct block));
+    temp->in_use = 0;
+}
+
 void* myalloc(int bytes ){
     if(bytes <= 1008){
         if (head == NULL) {
@@ -26,7 +46,8 @@ void* myalloc(int bytes ){
         }
         struct block *cur = head;
         while(cur != NULL){
-            if(cur->in_use != 1){
+            if(cur->in_use != 1 && cur->size >= PADDED_SIZE(bytes)){
+                split_space(cur, PADDED_SIZE(bytes));
                 cur->in_use = 1;
                 int padded_block_size = PADDED_SIZE(sizeof(struct block));
                 return PTR_OFFSET(cur, padded_block_size);
@@ -64,11 +85,9 @@ void print_data(void)
 
 int main(void) {
   // Allocate space for 5 ints
-    void *p;
-
-    print_data();
-    p = myalloc(16);
-    print_data();
-    p = myalloc(16);
-    printf("%p\n", p);
+    myalloc(10); print_data();
+    myalloc(20); print_data();
+    myalloc(30); print_data();
+    myalloc(40); print_data();
+    myalloc(50); print_data();
 }
