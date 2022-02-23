@@ -21,8 +21,7 @@ void split_space(struct block *current_node, int requested_size){
     int required_space = requested_size + padded_struct_block_size;
     int available_space = current_node->size;
     if (available_space > required_space){
-        struct block *new_node = NULL;
-        new_node = sbrk(1024);
+        struct block *new_node = PTR_OFFSET(current_node, padded_struct_block_size);
         new_node->next = NULL;
         new_node->size = available_space-required_space;
         new_node->in_use = 0;
@@ -71,8 +70,8 @@ void print_data(void)
 
     while (b != NULL) {
         // Uncomment the following line if you want to see the pointer values
-        // printf("[%p:%d,%s]", b, b->size, b->in_use? "used": "free");
-        printf("[%d,%s]", b->size, b->in_use? "used": "free");
+        printf("[%p:%d,%s]", b, b->size, b->in_use? "used": "free");
+        //printf("[%d,%s]", b->size, b->in_use? "used": "free");
         if (b->next != NULL) {
             printf(" -> ");
         }
