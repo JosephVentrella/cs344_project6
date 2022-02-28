@@ -31,8 +31,20 @@ void split_space(struct block *current_node, int requested_size){
 }
 
 void myfree(void *p){
-    struct block *temp = p - PADDED_SIZE(sizeof(struct block));
-    temp->in_use = 0;
+    struct block *freed = p - PADDED_SIZE(sizeof(struct block));
+    struct block *cur = head;
+    freed->in_use = 0;
+    while (cur->next != NULL)
+    {
+        if (cur->in_use == 0 && cur->next->in_use == 0){
+            cur->size = cur->next->size + cur->size + PADDED_SIZE(sizeof(struct block));
+            cur->next = cur->next->next;
+        }
+        else {
+            cur = cur->next;
+        }
+    }
+    
 }
 
 void* myalloc(int bytes ){
@@ -70,8 +82,8 @@ void print_data(void)
 
     while (b != NULL) {
         // Uncomment the following line if you want to see the pointer values
-        printf("[%p:%d,%s]", b, b->size, b->in_use? "used": "free");
-        //printf("[%d,%s]", b->size, b->in_use? "used": "free");
+        //printf("[%p:%d,%s]", b, b->size, b->in_use? "used": "free");
+        printf("[%d,%s]", b->size, b->in_use? "used": "free");
         if (b->next != NULL) {
             printf(" -> ");
         }
@@ -83,10 +95,15 @@ void print_data(void)
 }
 
 int main(void) {
-  // Allocate space for 5 ints
-    myalloc(10); print_data();
-    myalloc(20); print_data();
-    myalloc(30); print_data();
-    myalloc(40); print_data();
-    myalloc(50); print_data();
+    void *p, *q, *r, *s;
+
+    p = myalloc(10); print_data();
+    q = myalloc(20); print_data();
+    r = myalloc(30); print_data();
+    s = myalloc(40); print_data();
+
+    myfree(q); print_data();
+    myfree(p); print_data();
+    myfree(s); print_data();
+    myfree(r); print_data();
 }
